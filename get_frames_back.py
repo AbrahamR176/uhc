@@ -19,19 +19,27 @@ with open(f"{os.getcwd()}\\times\\vid6.txt", 'rb') as f:
         except EOFError:
             break
 
-vid1 = vid1[:-int(vid1[0][2])*20]
-vid2 = vid2[:-int(vid2[0][2])*20]
-vid1 = vid1[int(vid1[0][2])*20:]
-vid2 = vid2[int(vid2[0][2])*20:]
-
 differences = []
 for x in vid1:
     for y in vid2:
         if x[3] == y[3]:
             diff = abs(x[0]-y[0])
-            print(f"found match at: {x[0]}:{y[0]}, diff {diff}")
             if diff < 5000:
-                differences.append(abs(x[0]-y[0]))
+                print(f"found match at: {x[0]}:{y[0]}, diff {diff}")
+                differences.append(diff)
 
-print(round(sum(differences)/len(differences)))
+old = 0
+most = 0
+counter = 0
+hicounter = 0
+for x in differences:
+    if old == x:
+        most = x
+        counter = counter + 1
+    else:
+        if counter > hicounter:
+            hicounter = counter
+        counter = 0
+    old = x
 
+print(most, hicounter)

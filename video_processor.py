@@ -5,6 +5,7 @@ import numpy as np
 from multiprocessing.pool import ThreadPool
 import os
 import pickle
+import re
 
 pt.pytesseract.tesseract_cmd = 'C:\\Users\\abraham\\AppData\\Local\\Tesseract-OCR\\tesseract.exe'
 
@@ -24,8 +25,8 @@ def main():
     # create and start the threads to process the times for the videos
     t1 = ThreadPool(processes=1)
     t2 = ThreadPool(processes=1)
-    tt1 = t1.apply_async(process_vid, (path1, r1, f"{result_path}\\vid5.txt", 30))
-    tt2 = t2.apply_async(process_vid, (path2, r2, f"{result_path}\\vid6.txt", 30))
+    tt1 = t1.apply_async(process_vid, (path1, r1, f"{result_path}\\vid5.txt", 300))
+    tt2 = t2.apply_async(process_vid, (path2, r2, f"{result_path}\\vid6.txt", 300))
 
     # get the results
     result1 = tt1.get()
@@ -39,22 +40,6 @@ def write_result(result_list, dir, name):
 
     for x in result_list:
         pass
-
-def do_sm_else():
-    result1 = result1[: len(result1) - 60]
-    result2 = result2[: len(result2) - 60]
-    #print(result1)
-    #print(result2)
-    times = []
-
-    for x in result1:
-        for y in result2:
-            if x[2] == y[2]:
-                times.append([int(x[0]), int(y[0])])
-            
-    for x in times:
-        time = abs(x[0] - x[1])
-        print(f"time diff is {time}")
 
 def process_vid(vid_path, r, path, frame_target=1000):
     if os.path.exists(path):
@@ -82,8 +67,13 @@ def process_vid(vid_path, r, path, frame_target=1000):
         else:
             break
 
+        print(f"processing {total}")
         frame = prep_frame(image, total, r)
         msg = pt.image_to_string(frame, lang="mc")
+
+        #leave this part of the code if only numbers matter
+        msg = re.sub("[^0-9]+","",msg)
+
         if msg != "":
             fancy_write(file, [total, int(frame_cnt), frame_target, msg])
         else:
@@ -94,6 +84,11 @@ def process_vid(vid_path, r, path, frame_target=1000):
     print((end-start)*1)
     file.close()
     return 1
+
+def timer_target(msg):
+    if len(msg) == 5:
+        msg[2] = ""
+    return msg
 
 def fancy_write(file, info):
     pickle.dump(info, file)
