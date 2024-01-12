@@ -7,33 +7,41 @@ import os
 import pickle
 import re
 
-pt.pytesseract.tesseract_cmd = 'C:\\Users\\abraham\\AppData\\Local\\Tesseract-OCR\\tesseract.exe'
+#pt.pytesseract.tesseract_cmd = 'C:\\Users\\abraham\\AppData\\Local\\Tesseract-OCR\\tesseract.exe'
 
 def main():
 
     # prepare the path for the results
     result_path = prepare_dic("times")
 
-    # get the videos to be used
-    path1 = "C:\\Users\\abraham\\Documents\\Code\\uhc\\vid5.mp4"
-    path2 = "C:\\Users\\abraham\\Documents\\Code\\uhc\\vid7.mp4"
-
+    paths = get_paths("input")
+    print(paths)
     # get the region for the videos where the matching content is
-    r1 = get_region(path1)
-    r2 = get_region(path2)
-    
+
+    regions = []
+    for x in paths:
+        regions.append(get_region(x))
+
     # create and start the threads to process the times for the videos
-    t1 = ThreadPool(processes=1)
-    t2 = ThreadPool(processes=1)
-    tt1 = t1.apply_async(process_vid, (path1, r1, f"{result_path}\\vid5.txt", 15))
-    tt2 = t2.apply_async(process_vid, (path2, r2, f"{result_path}\\vid6.txt", 15))
 
-    # get the results
-    result1 = tt1.get()
-    result2 = tt2.get()
+    threads = []
+    for x in range(len(regions)):
+        thread = ThreadPool(processes=1)
+        tt1 = thread.apply_async(process_vid, (paths[x], regions[x], f"{result_path}/{x}"))
+        threads.append(tt1)
 
-    #write_result(result1, result_path, "5min.txt")
+    for x in threads:
+        x.get()
+
     return 1
+
+def get_paths(path):
+    files = os.listdir(path)
+    folder = os.path.join(os.getcwd(),path)
+
+    for x in range(len(files)):
+        files[x] = os.path.join(folder, files[x])
+    return files
 
 def write_result(result_list, dir, name):
     file = open(f"{dir}\name.txt", "w")
@@ -42,16 +50,19 @@ def write_result(result_list, dir, name):
         pass
 
 def process_vid(vid_path, r, path, frame_target=1000):
+    print(f"{vid_path},{r},{path},{frame_target}")
+
     if os.path.exists(path):
         os.remove(path)
     file = open(path, "ab")
 
     #start timer
     start = time.time()
-    #final_list = []
 
     #start video instance and get the first frame
     im = cv2.VideoCapture(vid_path)
+
+    frame_target = im.get(cv2.CAP_PROP_FPS)
 
     frame_cnt = im.get(cv2.CAP_PROP_FRAME_COUNT)
     im.set(1,0)
@@ -69,7 +80,7 @@ def process_vid(vid_path, r, path, frame_target=1000):
 
         print(f"processing {total}")
         frame = prep_frame(image, total, r)
-        msg = pt.image_to_string(frame, lang="mc")
+        msg = pt.image_to_string(frame, lang="mc") 
 
         #leave this part of the code if only numbers matter
         msg = re.sub("[^0-9]+","",msg)
@@ -112,7 +123,7 @@ def get_region(path):
     return r
 
 def prepare_dic(target="times"):
-    path = f"{os.getcwd()}\{target}"
+    path = f"{os.path.join(os.getcwd(), target)}"
     if not os.path.exists(path):
         print("Creating directory")
         os.mkdir(path)
