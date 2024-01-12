@@ -16,7 +16,7 @@ def main():
 
     # get the videos to be used
     path1 = "C:\\Users\\abraham\\Documents\\Code\\uhc\\vid5.mp4"
-    path2 = "C:\\Users\\abraham\\Documents\\Code\\uhc\\vid6.mp4"
+    path2 = "C:\\Users\\abraham\\Documents\\Code\\uhc\\vid7.mp4"
 
     # get the region for the videos where the matching content is
     r1 = get_region(path1)
@@ -25,8 +25,8 @@ def main():
     # create and start the threads to process the times for the videos
     t1 = ThreadPool(processes=1)
     t2 = ThreadPool(processes=1)
-    tt1 = t1.apply_async(process_vid, (path1, r1, f"{result_path}\\vid5.txt", 300))
-    tt2 = t2.apply_async(process_vid, (path2, r2, f"{result_path}\\vid6.txt", 300))
+    tt1 = t1.apply_async(process_vid, (path1, r1, f"{result_path}\\vid5.txt", 15))
+    tt2 = t2.apply_async(process_vid, (path2, r2, f"{result_path}\\vid6.txt", 15))
 
     # get the results
     result1 = tt1.get()

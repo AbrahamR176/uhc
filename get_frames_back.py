@@ -20,26 +20,22 @@ with open(f"{os.getcwd()}\\times\\vid6.txt", 'rb') as f:
             break
 
 differences = []
+included = []
 for x in vid1:
     for y in vid2:
-        if x[3] == y[3]:
-            diff = abs(x[0]-y[0])
-            if diff < 5000:
-                print(f"found match at: {x[0]}:{y[0]}, diff {diff}")
-                differences.append(diff)
+        if x[3] != "None" and y[3] != "None":
+            if len(x[3]) == 4 and len(y[3]) == 4:
+                if int(x[3]) != 3000:
+                    if int(x[3]) == int(y[3]):   
+                        if int(x[3]) not in included:
+                            included.append(int(x[3]))
+                            differences.append(abs(x[0] - y[0]))
+                            print(f"got a match at {x[0]}:{y[0]}, time: {x[3]},{y[3]}, {x[0] - y[0]}")
 
-old = 0
-most = 0
-counter = 0
-hicounter = 0
+error = max(set(differences), key=differences.count)
 for x in differences:
-    if old == x:
-        most = x
-        counter = counter + 1
-    else:
-        if counter > hicounter:
-            hicounter = counter
-        counter = 0
-    old = x
+    if x > error + vid1[0][2] and x < error - vid1[0][2]:
+        x = error
 
-print(most, hicounter)
+print(sum(differences)/len(differences))
+
