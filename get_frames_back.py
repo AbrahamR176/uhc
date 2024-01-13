@@ -30,7 +30,7 @@ for x in range(len(files)):
 differences = []
 included = []
 baseline = 1
-target_fps = vids[baseline][0][2]
+target_fps = 30
 
 # fix non-30fps videos
 for x in vids:
@@ -94,8 +94,10 @@ for x in range(len(vids)):
                 region       = infos[x][1],
                 data_path    = infos[x][2],
                 frame_target = infos[x][3],
-                delay        = abs(mss[x]),
-                nen          = 0)
+                delay        = (mss[x]),
+                nen          = 0,
+                dominant     = 0)
+    if x == baseline: temp['dominant'] = 1
     if mss[x] < 0: temp['nen'] = 1
     result.append(temp)
     
