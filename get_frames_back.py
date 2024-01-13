@@ -29,7 +29,7 @@ for x in range(len(files)):
 # initialize useful values
 differences = []
 included = []
-baseline = 2
+baseline = 1
 target_fps = vids[baseline][0][2]
 
 # fix non-30fps videos
@@ -51,7 +51,7 @@ for z in vids:
                                 if int(x[3]) not in included:
                                     included.append(int(x[3]))
                                     print(f"got a match at {x[0]}:{y[0]}, time: {x[3]},{y[3]}, {x[0] - y[0]}")
-                                    temp.append(abs((x[0] - y[0])))
+                                    temp.append(((x[0] - y[0])))
 
     differences.append(copy.deepcopy(temp))
     included = []
@@ -94,7 +94,9 @@ for x in range(len(vids)):
                 region       = infos[x][1],
                 data_path    = infos[x][2],
                 frame_target = infos[x][3],
-                delay        = mss[x])
+                delay        = abs(mss[x]),
+                nen          = 0)
+    if mss[x] < 0: temp['nen'] = 1
     result.append(temp)
     
 json.dump(result, results, indent=4)
