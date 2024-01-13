@@ -7,7 +7,7 @@ import os
 import pickle
 import re
 
-#pt.pytesseract.tesseract_cmd = 'C:\\Users\\abraham\\AppData\\Local\\Tesseract-OCR\\tesseract.exe'
+pt.pytesseract.tesseract_cmd = 'C:\\Users\\abraham\\AppData\\Local\\Tesseract-OCR\\tesseract.exe'
 
 def main():
 
@@ -27,7 +27,7 @@ def main():
     threads = []
     for x in range(len(regions)):
         thread = ThreadPool(processes=1)
-        tt1 = thread.apply_async(process_vid, (paths[x], regions[x], f"{result_path}/{x}"))
+        tt1 = thread.apply_async(process_vid, (paths[x], regions[x], os.path.join(result_path, str(x))))
         threads.append(tt1)
 
     for x in threads:
@@ -36,7 +36,7 @@ def main():
     return 1
 
 def get_paths(path):
-    files = os.listdir(path)
+    files = os.listdir(os.path.join(os.getcwd(), path))
     folder = os.path.join(os.getcwd(),path)
 
     for x in range(len(files)):
@@ -50,8 +50,8 @@ def write_result(result_list, dir, name):
         pass
 
 def process_vid(vid_path, r, path, frame_target=1000):
-    print(f"{vid_path},{r},{path},{frame_target}")
 
+    # Open file in append mode
     if os.path.exists(path):
         os.remove(path)
     file = open(path, "ab")
@@ -62,15 +62,21 @@ def process_vid(vid_path, r, path, frame_target=1000):
     #start video instance and get the first frame
     im = cv2.VideoCapture(vid_path)
 
+    # Get neccessary processing information
     frame_target = im.get(cv2.CAP_PROP_FPS)
-
     frame_cnt = im.get(cv2.CAP_PROP_FRAME_COUNT)
+
+    # Set proper frame
     im.set(1,0)
     success = True
     total = 0
 
+    # Write identifying information in the beginning of the file
+    info = [vid_path, r, path, frame_target]
+    pickle.dump(info, file)
+
     while(success):
-        # get the next frame
+        # Get the next frame
         if total + frame_target < frame_cnt:
             im.set(1, total+frame_target)
             success, image = im.read()
@@ -82,7 +88,7 @@ def process_vid(vid_path, r, path, frame_target=1000):
         frame = prep_frame(image, total, r)
         msg = pt.image_to_string(frame, lang="mc") 
 
-        #leave this part of the code if only numbers matter
+        # Leave this part of the code if only numbers matter
         msg = re.sub("[^0-9]+","",msg)
 
         if msg != "":
