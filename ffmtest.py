@@ -18,6 +18,14 @@ for x in info:
    for y in info:
       y['delay'] = y['delay'] + abs(x_delay)
 
+lowest = math.inf
+for x in info:
+   if x['delay'] < lowest:
+      lowest = x['delay']
+
+for x in info:
+   x['delay'] = x['delay'] - lowest
+
 # Calculate the rows and columns for the final result
 columns = math.ceil(math.sqrt(len(info)))
 rows = math.ceil(len(info)/columns)
@@ -47,7 +55,10 @@ for x in range(len(layers)):
    stacks = f"{stacks}[{layers[x]}]"
 stacks = f"{stacks}vstack=inputs={rows}"
 
-command = f''' ffmpeg {inputs} -filter_complex "{filter}{stacks}" -s 320x180 -r 30 test.mkv'''
+command = f''' ffmpeg {inputs} \
+    -filter_complex "{filter}{stacks}" \
+    -s 320x180 -r 30 -af "adelay={info[0]['delay']}|{info[0]['delay']}" \
+    test.mkv'''
                
 print(command) 
 os.system(command)

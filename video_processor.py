@@ -1,63 +1,67 @@
-import pytesseract as pt 
-import cv2
 import time
 import numpy as np
 from multiprocessing.pool import ThreadPool
 import os
 import pickle
+import platform
+import pytesseract as pt 
+import cv2
 import re
 
-#pt.pytesseract.tesseract_cmd = 'C:\\Users\\abraham\\AppData\\Local\\Tesseract-OCR\\tesseract.exe'
+def obtain_video_data(info, no_episode):
 
-def main():
+    # Initialize useful values
+    vids = []
+    rois = []
+    names = []
 
     # prepare the path for the results
-    result_path = prepare_dic("times")
+    result_path = prepare_dic(os.path.join((os.path.join(os.getcwd(), "episodes")), str(no_episode)))
 
-    paths = get_paths("input")
-    print(paths)
-    # get the region for the videos where the matching content is
-
-    regions = []
-    for x in paths:
-        regions.append(get_region(x))
+    # get the paths for the files
+    for x in info:   
+        vids.append(x['video_path'])
+        rois.append(x['roi'])
+        names.append(x['file'])
 
     # create and start the threads to process the times for the videos
-
     threads = []
-    for x in range(len(regions)):
+    for x in range(len(info)):
         thread = ThreadPool(processes=1)
-        tt1 = thread.apply_async(process_vid, (paths[x], regions[x], os.path.join(result_path, str(x))))
+        tt1 = thread.apply_async(process_vid, 
+                                (vids[x], 
+                                rois[x], 
+                                os.path.join(result_path, names[x])))
         threads.append(tt1)
 
+    # get the data form all the threads
     for x in threads:
         x.get()
 
+    # return a satisfactory answer
     return 1
 
 def get_paths(path):
+
+    # get all the files inside of the intest folder
     files = os.listdir(os.path.join(os.getcwd(), path))
-    folder = os.path.join(os.getcwd(),path)
+    folder = os.path.join(os.getcwd(), path)
 
     for x in range(len(files)):
         files[x] = os.path.join(folder, files[x])
+        files[x] = files[x][:-4]
     return files
 
-def write_result(result_list, dir, name):
-    file = open(f"{dir}\name.txt", "w")
+def process_vid(vid_path, r, path):
 
-    for x in result_list:
-        pass
-
-def process_vid(vid_path, r, path, frame_target=1000):
+    # Setting the path for pytesseracts executable on windows
+    if platform.system() == "Windows":
+        pt.pytesseract.tesseract_cmd = 'C:\\Users\\abraham\\AppData\\Local\\Tesseract-OCR\\tesseract.exe'
 
     # Open file in append mode
     if os.path.exists(path):
         os.remove(path)
     file = open(path, "ab")
-
-    #start timer
-    start = time.time()
 
     #start video instance and get the first frame
     im = cv2.VideoCapture(vid_path)
@@ -84,35 +88,24 @@ def process_vid(vid_path, r, path, frame_target=1000):
         else:
             break
 
-        print(f"processing {total}")
-        frame = prep_frame(image, total, r)
+        print(f"{total:.0f} {os.path.split(vid_path)[len(os.path.split(vid_path)) - 2]}")
+        frame = prep_frame(image, r)
         msg = pt.image_to_string(frame, lang="mc") 
 
         # Leave this part of the code if only numbers matter
         msg = re.sub("[^0-9]+","",msg)
 
         if msg != "":
-            fancy_write(file, [total, int(frame_cnt), frame_target, msg])
+            pickle.dump([total, int(frame_cnt), frame_target, msg], file)
         else:
-            fancy_write(file, [total, int(frame_cnt), frame_target, "None"])
+            pickle.dump([total, int(frame_cnt), frame_target, "None"], file)
 
     # finish timer to get final process time
-    end = time.time()
-    print((end-start)*1)
     file.close()
     return 1
 
-def timer_target(msg):
-    if len(msg) == 5:
-        msg[2] = ""
-    return msg
+def prep_frame(result: np.ndarray, r):
 
-def fancy_write(file, info):
-    pickle.dump(info, file)
-
-def prep_frame(result: np.ndarray, number, r):
-
-    #1.1
     result = cv2.cvtColor(result, cv2.COLOR_BGR2RGB)
     result = result[int(r[1]):int(r[1]+r[3]),  
                     int(r[0]):int(r[0]+r[2])] 
@@ -121,22 +114,12 @@ def prep_frame(result: np.ndarray, number, r):
     result = cv2.filter2D(result, -1, sharpen_filter)
     return result
 
-def get_region(path):
-    im = cv2.VideoCapture(path)
-    im.set(1,30000)
-    s, i = im.read()
-    r = cv2.selectROI(i)
-    return r
+def prepare_dic(target="data"):
 
-def prepare_dic(target="times"):
-    path = f"{os.path.join(os.getcwd(), target)}"
+    # Prepares the directory that will be used for the program
+    path = target
+
+    # Make sure the folder is created
     if not os.path.exists(path):
-        print("Creating directory")
         os.mkdir(path)
-        return path
-    else:
-        print("path already created")
-        return path
-
-if __name__ == '__main__':
-    main()
+    return path
