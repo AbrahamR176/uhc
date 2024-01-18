@@ -9,7 +9,7 @@ Although this program was made to function around the "ElRichMC" hispanic UHC se
 
 - Timer-based synchronization of videos
 - Downloads all the videos from a playlist
-- Automatic video arranging for ffmpeg outputs
+- Automatic video sorting for ffmpeg outputs
 
 ## Dependencies
 
@@ -37,4 +37,8 @@ Make sure the .traineddata is located in the proper directory.
 - Enable video rearrange.
 - Enable multi-channel audio selection in real-time.
 - Optimize OCR stage.
+
+## Screenshots
+
+![App Screenshot](Screenshots/image_demo.png)
 
