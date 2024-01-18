@@ -1,0 +1,1 @@
+yt-dlp.exe -o "input/%(channel)s/%(upload_date)s.%(ext)s" "https://www.youtube.com/watch?v=Icu5qhtkB2E&list=PLX4N0Kucn9IzWdAGVL5WAO-lB-A_8i3vq" --remux-video mp4 --embed-info-json -f "best[height][fps<=40]"
