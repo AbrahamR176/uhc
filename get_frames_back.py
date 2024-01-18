@@ -37,12 +37,16 @@ def obtain_intermediary_file(data_path, episodes_folder):
 
     # fix non-30fps videos
     for x in vids:
-        if x[0][2] != 30:
+        if x[0][2] != target_fps:
             for y in range(len(x)):
-                x[y][0] = x[y][0] + (y+1)*(target_fps-x[y][2])
+                x[y][0] = round(x[y][0] + (y+1)*(target_fps-x[y][2]))
 
     # Get differences between baseline video and rest
+    logs = []
+    matching = []
+    matching_in = 0
     for z in vids:
+        matching.append([])
         temp = []
         if z != vids[baseline]: 
             for x in vids[baseline]:
@@ -53,9 +57,11 @@ def obtain_intermediary_file(data_path, episodes_folder):
                                 if int(x[3]) == int(y[3]):   
                                     if int(x[3]) not in included:
                                         included.append(int(x[3]))
-                                        print(f"got a match at {x[0]}:{y[0]}, time: {x[3]},{y[3]}, {x[0] - y[0]}")
+                                        logs.append(f"got a match at {x[0]}:{y[0]}, time: {x[3]},{y[3]}, {x[0] - y[0]}")
                                         temp.append(((x[0] - y[0])))
+                                        matching[matching_in].append([y[0], f"{x[0] - y[0]}"])
 
+        matching_in = matching_in + 1
         differences.append(copy.deepcopy(temp))
         included = []
 
@@ -66,6 +72,9 @@ def obtain_intermediary_file(data_path, episodes_folder):
             errors.append(max(set(x), key=x.count))
         except:
             errors.append([])
+
+    # Separate the videos in to sections
+
 
     # Fix out of scope/erroneous values
     for x in range(len(differences)):
@@ -78,7 +87,7 @@ def obtain_intermediary_file(data_path, episodes_folder):
     mss = []
     for x in range(len(differences)):
         if x != baseline:
-            mss.append(round(((sum(differences[x])/len(differences[x]))/vids[x][0][2])*1000))
+            mss.append(round(((sum(differences[x])/len(differences[x]))/target_fps)*1000))
         else:
             mss.append(0)
 
@@ -105,4 +114,17 @@ def obtain_intermediary_file(data_path, episodes_folder):
         result.append(temp)
         
     json.dump(result, results, indent=4)
+
+
+    last = 0
+    log_file = open(os.path.join(os.getcwd(), "log.txt"), "w")
+    for x in matching:
+        if x != []:
+            for y in x:
+                log_file.write(f"{str(y)}, diff = {y[0] - last}")
+                log_file.write("\n")
+                last = y[0]
+            log_file.write("\n\n\n\n\nGOING TO THE NEXT\n\n\n\n\n")
+        
+    print(mss)
         

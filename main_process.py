@@ -79,10 +79,11 @@ def main():
     # Queue all the data to process into the output files
     if decision == 'y':
         # do the rest of the calculation
-        obtain_video_data(details[0], 1)
+        for x in range(len(details)):
+            obtain_video_data(details[x], x+1)
 
-    obtain_intermediary_file(os.path.join(os.path.join(os.getcwd(), "episodes"), "1"), 
-                             os.path.join(os.path.join(os.getcwd(), "episodes")))
+    #obtain_intermediary_file(os.path.join(os.path.join(os.getcwd(), "episodes"), "1"), 
+    #                         os.path.join(os.path.join(os.getcwd(), "episodes")))
 
 def get_region(path):
     print(path)

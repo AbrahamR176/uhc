@@ -29,6 +29,7 @@ for x in info:
 # Calculate the rows and columns for the final result
 columns = math.ceil(math.sqrt(len(info)))
 rows = math.ceil(len(info)/columns)
+res = [1280 ,720]
 print(f"colums: {columns}, rows: {rows}")
 
 # Create the complex filter used for adding the dalays
@@ -57,7 +58,7 @@ stacks = f"{stacks}vstack=inputs={rows}"
 
 command = f''' ffmpeg {inputs} \
     -filter_complex "{filter}{stacks}" \
-    -s 320x180 -r 30 -af "adelay={info[0]['delay']}|{info[0]['delay']}" \
+    -s {res[0]}x{res[1]} -r 30 -af "adelay={info[0]['delay']}|{info[0]['delay']}" \
     test.mkv'''
                
 print(command) 

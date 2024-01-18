@@ -27,12 +27,13 @@ def obtain_video_data(info, no_episode):
     # create and start the threads to process the times for the videos
     threads = []
     for x in range(len(info)):
-        thread = ThreadPool(processes=1)
-        tt1 = thread.apply_async(process_vid, 
-                                (vids[x], 
-                                rois[x], 
-                                os.path.join(result_path, names[x])))
-        threads.append(tt1)
+        if vids[x] != 'none':
+            thread = ThreadPool(processes=1)
+            tt1 = thread.apply_async(process_vid, 
+                                    (vids[x], 
+                                    rois[x], 
+                                    os.path.join(result_path, names[x])))
+            threads.append(tt1)
 
     # get the data form all the threads
     for x in threads:
@@ -76,7 +77,7 @@ def process_vid(vid_path, r, path):
     total = 0
 
     # Write identifying information in the beginning of the file
-    info = [vid_path, r, path, frame_target]
+    info = [vid_path, r, path, frame_target, os.path.split(os.path.split(vid_path)[0])]
     pickle.dump(info, file)
 
     while(success):
