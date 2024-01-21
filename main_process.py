@@ -19,9 +19,10 @@ def main():
     # Get the folders inside of the input folder, and format them for comp
     targets = os.listdir(input_folder)
     for x in range(len((targets))):
-        targets[x] = os.path.join(input_folder, targets[x])
+        if ".json" not in x:
+            targets[x] = os.path.join(input_folder, targets[x])
 
-    targets.remove(info_file_path)
+    #targets.remove(info_file_path)
     
     # Get the number of episodes
     for x in targets:
