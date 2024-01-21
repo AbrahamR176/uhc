@@ -1,4 +1,3 @@
-
 # UHC Video Maker
 
 This project aims to increase the fidelity of gameplay when watching compatible minecraft Ultra Hardcore from known Youtubers.
@@ -41,4 +40,3 @@ Make sure the .traineddata is located in the proper directory.
 ## Screenshots
 
 ![App Screenshot](Screenshots/image_demo.png)
-
