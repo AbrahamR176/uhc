@@ -2,3 +2,7 @@
 result
 times/*
 *.json
+log.txt
+test.mkv
+*.data
+*.pyc
