@@ -9,6 +9,7 @@ def obtain_intermediary_file(data_path, episodes_folder):
     print(data_path)
 
     # Create primary default values
+    log_folder = os.path.join(os.getcwd(), "logs")
     vids = []
     files = os.listdir(data_path)
     folder = episodes_folder
@@ -115,9 +116,8 @@ def obtain_intermediary_file(data_path, episodes_folder):
         
     json.dump(result, results, indent=4)
 
-
     last = 0
-    log_file = open(os.path.join(os.getcwd(), "log.txt"), "w")
+    log_file = open(os.path.join(log_folder, "log.txt"), "w")
     for x in matching:
         if x != []:
             for y in x:

@@ -6,15 +6,19 @@ from get_frames_back import obtain_intermediary_file
 
 def main():
 
+    # Ensure all the folders are created
+    prepare_folders()
+
     # initialize primary functions
     input_folder = os.path.join(os.getcwd(), "input")
     info_file_path = os.path.join(input_folder, "details.json")
+
+    # Placeholder values
     rois = []
-    fpss = []
     details = []
-    datas = []
-    n_episodes = 0
     players = []
+    decision = "y"
+    n_episodes = 0
 
     # Get the folders inside of the input folder, and format them for comp
     targets = os.listdir(input_folder)
@@ -41,7 +45,6 @@ def main():
         
     # Get the regions for all of the inputs
     if decision == "y":
-
         for x in targets:
             roi= get_region(os.path.join(x, os.listdir(x)[0]))
             rois.append(roi)
@@ -49,7 +52,6 @@ def main():
         for x in range(n_episodes):
             temp = []
             for y in range(len(targets)):
-
                 try:
                     temp.append(dict(
                         video_path = (os.path.join(targets[y],
@@ -85,6 +87,18 @@ def main():
 
     #obtain_intermediary_file(os.path.join(os.path.join(os.getcwd(), "episodes"), "1"), 
     #                         os.path.join(os.path.join(os.getcwd(), "episodes")))
+
+def prepare_folders(input_f="input", episodes_f="episodes", log_f="logs"):
+    root = os.getcwd()
+
+    if not os.path.exists(os.path.join(root,input_f)):
+        os.mkdir(os.path.join(root, input_f))
+
+    if not os.path.exists(os.path.join(root,episodes_f)):
+        os.mkdir(os.path.join(root, episodes_f))
+
+    if not os.path.exists(os.path.join(root,episodes_f)):
+        os.mkdir(os.path.join(root, log_f))
 
 def get_region(path):
     print(path)
